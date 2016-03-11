@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime, Float
-from sqlalchemy.types import DECIMAL
+
 
 
 engine = create_engine('postgresql://vagrant:vagrant@localhost:5432/tbay')
@@ -30,6 +30,6 @@ class Bid(Base):
     __tablename__ = "bids"
 
     id = Column(Integer, primary_key=True)
-    price = Column(DECIMAL(scale=2), nullable=False) ## is this the correct syntax for currency values?
+    price = Column(Float(scale=2), nullable=False) ## is this the correct syntax for currency values?
 
 Base.metadata.create_all(engine)
