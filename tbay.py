@@ -18,8 +18,13 @@ class Item(Base):
     name = Column(String, nullable=False)
     description = Column(String)
     start_time = Column(DateTime, default=datetime.utcnow)
+    starting_price = Column(Float(scale=2), nullable=False, default=1.00)
+    owner_id = Column(Integer, ForeignKey('user.id'), nullable=False) #Item belons to user, hence owner_id foreign key
 
-    owner_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    bidders = relationship("User", secondary="bid",
+                            backref="bidding_item")## item has many bidders through bid.
+
+
 
 class User(Base):
     __tablename__ = "user"
@@ -27,21 +32,39 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     username = Column(String, nullable=False)
     password = Column(String, nullable=False)
-    items = relationship("Item", backref="owner") ##if uselist=False ommitted then will be one-to-many
+
+    owned_items = relationship("Item", backref="owner") ##user has many (owns) items
+    bidded_items = relationship("Item", secondary="bid", backref="bidder")##user(or a bidder) has many bidded_items through bid
+
+
+
 
 class Bid(Base):
     __tablename__ = "bid"
 
     id = Column(Integer, primary_key=True)
-    price = Column(Float(scale=2), nullable=False)
+    bidder_id = Column(Integer, ForeignKey('user.id'), nullable=False) #Bid belongs to user
+    item_id = Column(Integer, ForeignKey('item.id'), nullable=False) #Bid belongs to an item
+    price = Column(Float(scale=2), nullable=False, default=0.50)
 
 Base.metadata.create_all(engine)
 
 raghu = User(username="raghureddyram", password="hellohello")
 steven = User(username="steven", password="smarty")
-# session.add_all([raghu, steven])
-# session.commit()
+jason = User(username="jason", password="doubledutch")
+session.add_all([raghu, steven, jason])
+session.commit()
+
 keyring = Item(name="keyring", description="place to hold keys", owner_id=raghu.id)
+baseball = Item(name="baseball", owner_id=steven.id)
+toothpaste = Item(name="toothpaste", owner_id=jason.id)
+
+session.add_all([keyring, baseball, toothpaste])
+session.commit()
+
+
+
+
 
 # session.add(keyring)
 # session.commit()
